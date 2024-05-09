@@ -33,8 +33,7 @@ def lambda_handler(event, context):
 
     # Load image with OpenCV
     img = cv2.imread(local_filename)
-    # Convert color from BGR to RGB
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    h, w, _ = img.shape  # Get dimensions of the image
 
     # Detect labels
     response = rekognition.detect_labels(
@@ -52,7 +51,12 @@ def lambda_handler(event, context):
     for label in response['Labels']:
         name = label['Name']
         confidence = label['Confidence']
-        cv2.putText(img, f"{name} ({confidence:.2f}%)", (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        if 'Instances' in label:
+            for instance in label['Instances']:
+                box = instance['BoundingBox']
+                left = int(box['Left'] * w)
+                top = int(box['Top'] * h)
+                cv2.putText(img, f"{name} ({confidence:.2f}%)", (left, top - 10), font, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
     # Save image with labels to a new file
     output_filename = f"/tmp/labeled-{key}"
