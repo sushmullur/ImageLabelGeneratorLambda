@@ -1,16 +1,17 @@
 #!/bin/bash
 
-# Define the build directory and the handler script
+# Define the build directory and the script directory
 BUILD_DIR="./build"
-HANDLER_SCRIPT="index.py"
+SRC_DIR="./src"
 
+# Clean existing build directory
 rm -rf $BUILD_DIR
 
 # Ensure the build directory exists
-mkdir $BUILD_DIR
+mkdir -p $BUILD_DIR
 
-# Copy the handler script to the build directory
-cp $HANDLER_SCRIPT $BUILD_DIR/
+# Copy all source files to the build directory
+cp -R $SRC_DIR/* $BUILD_DIR/
 
 # Use the lambci Docker image that matches Lambda's environment
 docker run --rm -v "$PWD":/var/task "lambci/lambda:build-python3.8" bash -c "
@@ -27,13 +28,12 @@ zip -r9 ImageProcessor.zip .
 # Move the zip file to the project directory
 mv ImageProcessor.zip ..
 
-# Move back to the project directory
+# Cleanup by removing build directory
 cd ..
-
-# Optional: Cleanup by removing build directory
 rm -rf $BUILD_DIR
 
-mkdir build
+# Prepare the build directory for the zip file
+mkdir -p build
 mv ImageProcessor.zip build/
 
 # Echo completion
