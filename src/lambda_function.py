@@ -10,5 +10,5 @@ rekognition_client = boto3.client('rekognition')
 # Entry point for the lambda function
 @logger.inject_lambda_context
 def lambda_handler(event, context):
-    processor = ImageProcessor(s3_client, rekognition_client)
+    processor = ImageProcessor(s3_client, rekognition_client, logger)
     processor.process_image(event)
